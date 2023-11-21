@@ -5,14 +5,11 @@ import (
 	"encoding/json"
 	"math/rand"
 	"net/http"
+
+	"github.com/ardanlabs/service/business/types"
 )
 
 type APIFunc func(context.Context, http.ResponseWriter, *http.Request) error
-
-type PriceResponse struct {
-	Ticker string  `json: "ticker"`
-	Price  float64 `json: "price"`
-}
 
 type JSONAPIServer struct {
 	listerAddr string
@@ -21,6 +18,8 @@ type JSONAPIServer struct {
 
 func (s *JSONAPIServer) Run() {
 	http.HandleFunc("/", makeHTTPHandlerFunc(s.handleFetchPrice))
+	http.ListenAndServe(s.listerAddr, nil)
+
 }
 
 func NewJSONAPIServer(listerAddr string, svc PriceFetcher) *JSONAPIServer {
@@ -49,7 +48,7 @@ func (s *JSONAPIServer) handleFetchPrice(ctx context.Context, w http.ResponseWri
 		return err
 	}
 
-	priceResp := PriceResponse{
+	priceResp := types.PriceResponse{
 		Price:  price,
 		Ticker: ticker,
 	}
